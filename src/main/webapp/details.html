@@ -195,11 +195,12 @@ let vm = new Vue({
 			
 			let flag = 0;
 			// 判断该商品是否已经存在 
-			if (login.$data.carts.length > 0) { // 说明购物车中有商品
-				login.$data.carts.forEach((item, index) => {
-					if(item.gno == this.goods.gno) { // 说明这个商品已经购买过
+			let lcarts = login.$data.carts;
+			if (lcarts.length > 0) { // 说明购物车中有商品
+				for (let i = 0, len = lcarts.length; i < len; i ++) {
+					if(lcarts[i].gno == this.goods.gno) { // 说明这个商品已经购买过
 						flag = 1;
-						axios.post("cart/updates", qs.stringify({num:this.nums, gno:this.goods.gno, cno:item.cno}))
+						axios.post("cart/updates", qs.stringify({num:this.nums, gno:this.goods.gno, cno:lcarts[i].cno}))
 						.then(result => {
 							let data = parseInt($.trim(result.data));
 							if (data > 0) {
@@ -210,7 +211,7 @@ let vm = new Vue({
 						 }) 
 						return;
 					}
-				})
+				}
 			}
 			
 			// 能到这里说明这个商品没有买过

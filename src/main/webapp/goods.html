@@ -181,9 +181,7 @@ var vm = new Vue({
 	el:"#app", // 对应div的id，即这个vue的作用域
 	data: {
 		typeName: "",
-		goods: {  // 商品信息
-			
-		},
+		goods: {},  // 商品信息
 		total: 0,  // 总记录数
 		pageNo: 1 // 当前页数
 	},
@@ -208,8 +206,25 @@ var vm = new Vue({
 			
 			let flag = 0;
 			// 判断该商品是否已经存在 
-			if (login.$data.carts.length > 0) { // 说明购物车中有商品
-				login.$data.carts.forEach((item, index) => {
+			let lcarts = login.$data.carts;
+			if (lcarts.length > 0) { // 说明购物车中有商品
+				for (let i = 0, len = lcarts.length; i < len; i ++) {
+					if(lcarts[i].gno == gno) { // 说明这个商品已经购买过
+						flag = 1;
+						axios.post("cart/updates", qs.stringify({num:1, gno:gno, cno:lcarts[i].cno}))
+						.then(result => {
+							let data = parseInt($.trim(result.data));
+							if (data > 0) {
+								alert("加入购物车成功....");
+							} else {
+								alert("加入购物车失败，请稍后重试...");
+							}
+						 })
+						 return;
+					}
+				}
+				
+			/*login.$data.carts.forEach((item, index) => { // 这种循环不能中间退出
 					if(item.gno == this.goods.gno) { // 说明这个商品已经购买过
 						flag = 1;
 						axios.post("cart/updates", qs.stringify({num:1, gno:gno, cno:item.cno}))
@@ -220,10 +235,10 @@ var vm = new Vue({
 							} else {
 								alert("加入购物车失败，请稍后重试...");
 							}
-						 }) 
-						return;
+						 })
+						
 					}
-				})
+				})*/
 			}
 
 			// 默认发送的格式是json格式，需要用qs转化成form表达提交的字符串拼接的格式

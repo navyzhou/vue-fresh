@@ -134,12 +134,8 @@ let vm = new Vue({
 		onlogin: false,
 		outlogin: true,
 		loginName: "匿名",
-		goods: {  // 商品信息
-			
-		},
-		types: { // 商品类型信息
-			
-		},
+		goods: {}, // 商品信息
+		types: {}, // 商品类型信息
 		goodsCount: 0,
 		carts:{} // 购物车信息
 	},
@@ -180,9 +176,7 @@ function getGoodsInfo() {
 	return axios({
 		url:"goods/finds",
 		method:"get",
-		params:{
-			
-		}
+		params:{}
 	})
 }
 </script>
