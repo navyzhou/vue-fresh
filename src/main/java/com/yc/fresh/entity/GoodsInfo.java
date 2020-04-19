@@ -103,7 +103,7 @@ public class GoodsInfo implements Serializable{
 			this.pic= pics.split(";")[0];
 			return;
 		}
-		this.pics = pics;
+		this.pic = pics;
 	}
 
 	public String getUnit() {

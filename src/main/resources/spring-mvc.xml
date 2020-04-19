@@ -20,4 +20,11 @@
 	
 	<!-- 启动mvc注解 -->
 	<mvc:annotation-driven></mvc:annotation-driven>
+	
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/front/**"/>
+			<bean class="com.yc.fresh.interceptor.FrontForwardInterceptor"></bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
 </beans>

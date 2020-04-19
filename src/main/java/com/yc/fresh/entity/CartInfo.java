@@ -2,6 +2,8 @@ package com.yc.fresh.entity;
 
 import java.io.Serializable;
 
+import com.yc.fresh.util.StringUtil;
+
 /**
  * 购物车信息
  * 源辰信息
@@ -80,6 +82,10 @@ public class CartInfo implements Serializable{
 	}
 
 	public void setPics(String pics) {
+		if (!StringUtil.checkNull(pics)) {
+			this.pics= pics.split(";")[0];
+			return;
+		}
 		this.pics = pics;
 	}
 
