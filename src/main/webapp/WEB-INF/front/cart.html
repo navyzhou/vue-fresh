@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>天天生鲜-购物车</title>
+<link rel="shortcut icon" href="../images/copylogo.png">
+<link rel="stylesheet" href="../css/reset.css">
+<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="../css/cart.css">
+</head>
+
+<body>
+<!-- 头部 -->
+<div id="login_info">
+	<div class="header_con">
+		<div class="header">
+	   		<div class="welcome fl">欢迎来到天天生鲜</div>
+	           <div class="fr">
+	           	<div class="login_info fl" v-if="onlogin">欢迎：<em>[ {{loginName}} ]</em></div>
+	            <div class="login_btn fl" v-if="onlogin">
+	               <span> | </span>	<a href="../register.html">注册</a>
+	             </div>
+	             <div class="login_btn fl" v-if="outlogin">
+	               	<a href="../login.html">登录</a><span> | </span><a href="../register.html">注册</a>
+	             </div>
+	           	 <div class="user_link fl">
+	                   <span> | </span><a href="user.html">用户中心</a>
+	                   <span> | </span><a href="cart.html">我的购物车</a>
+	                   <span> | </span><a href="order.html">我的订单</a>
+				</div>
+			</div>  
+		</div>
+	</div>
+
+	<!-- 搜索框-->
+	<div class="search_bar clearfix">
+	   	<a href="../index.html" class="logo fl"><img src="../images/logo.png"></a>
+		<div class="search_con fl">
+			<form>
+	            <input type="text" class="input_text fl" name="key_words" placeholder="搜索商品">
+	            <input type="submit" class="input_btn fr"  value="搜索">
+	        </form>
+		</div>
+		<div class="guest_cart fr">
+	        <a href="cart.html" class="cart_name fl">我的购物车</a>
+			<div class="goods_count fl" id="show_count">{{goodsCount}}</div>
+		</div>
+	</div>
+</div>
+   
+<!-- 购物车 -->
+<div id="app">
+	<div class="cart_con">
+		<h2 class="total_count">全部商品<em>1</em>件</h2>
+		<div class="cart_list_th clearfix">
+	    	<ul>
+	        	<li class="col01">商品名称</li>
+	        	<li class="col02">商品单位</li>
+	            <li class="col03">商品价格(元)</li>
+	            <li class="col04">数量</li>
+	            <li class="col05">小计</li>
+	            <li class="col06">操作</li>
+	        </ul>
+	    </div>
+		<div class="cart_list_td clearfix" id="cart_list">
+	      <ul v-for="(item, index) in carts" :id="'g_' + index">
+	  		<li class="col01"><input type="checkbox" checked :index="index"></li>
+	      	<li class="col02"><img :src="'../' + item.pics"></li>
+	          <li class="col03">牛奶草莓<br><em>{{item.price}}元/{{item.unit}}</em></li>
+	          <li class="col04">{{item.weight}}</li>
+	          <li class="col05">{{item.price}}元</li>
+	          <li class="col06">
+	          	<div class="num_add">
+	              	<a href="javascript:void(0)" @click="lost(index)" class="minus fl">-</a>
+	                  <input type="text" v-model="nums[index]" class="num_show fl">
+	                  <a href="javascript:void(0)" @click="add(index)" class="add fl">+</a>
+	              </div>
+	          </li>
+	          <li class="col07">{{item.price * nums[index]}}元</li>
+	          <li class="col08"><a href="javascript:void(0);" @click="delGoods(index, item.cno)">删除</a></li>
+	      </ul>
+	    </div>
+		<div class="setElements">
+	    	<ul>
+	        	<li class="col01"><input type="checkbox" checked id="all"></li>
+	        	<li class="col02"><label for="all">全选</label></li>
+	            <li class="col03">合计(不含运费)：<em id="totalPrices">&yen;{{totalPrice}}</em><br>共计<b id="totalNumbers">{{totalCount}}</b>件商品</li>
+	            <li class="col04"><a href="javascript:gotoPay()">去结算</a></li>
+	        </ul>
+	    </div>
+	</div>
+</div>
+<!-- 版权所有 -->
+<div class="footer">
+   	<div class="foot_link">
+   		<a href="#">关于我们</a> <span> | </span>
+           <a href="#">联系我么</a> <span> | </span>
+           <a href="#">招聘人才</a> <span> | </span>
+           <a href="#">友情链接</a> 
+   	</div>
+   	<p>CopyRight &copy; 2019 衡阳市源辰信息科技有限公司 All Rights Reserverd</p><p>电话：0734-8355998 湘ICP备16015987号</p>
+</div>
+    
+<script type="text/javascript" src="../js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="../js/vue.js"></script>
+<script type="text/javascript" src="../js/axios.js"></script>
+<script type="text/javascript" src="../js/qs.js"></script>
+<script type="text/javascript">
+let login = new Vue({
+	el:"#login_info", // 对应div的id，即这个vue的作用域
+	data: {
+		onlogin: false,
+		outlogin: true,
+		loginName: "匿名",
+		loginId:"",
+		carts:{},
+		goodsCount: 0
+	},
+	mounted:function(){ //数据挂载之前，相当于jquery中的$(function(){})，页面加载完成
+		axios({
+			url:"../member/check",
+			method:"get"
+		}).then(result => {
+			if (result.data.member) { // 说明登录了
+				this.onlogin = true;
+				this.outlogin = false;
+				this.loginName = result.data.member.nickName;
+				this.loginId = result.data.member.mno;
+				if (result.data.carts) { 
+					this.carts = result.data.carts;
+					this.goodsCount = result.data.carts.length;
+				}
+			} else { // 说明没有登录
+				this.onlogin = false;
+				this.outlogin = true;
+			}
+		})
+	}
+})
+
+let app = new Vue({
+	el:"#app", // 对应div的id，即这个vue的作用域
+	data: {
+		carts:{},
+		totalCount: 0,
+		totalPrice: 0,
+		nums: [],
+		prices: [],
+		status: [], // 是否被选择
+	},
+	mounted:function(){ //数据挂载之前，相当于jquery中的$(function(){})，页面加载完成
+		axios.get("../cart/finds", {params:{}}).then(result => {
+			this.carts = result.data;
+			result.data.forEach((item, index) => {
+				this.nums.push(item.num);
+				this.prices.push(item.price);
+				this.status.push(1);
+				this.totalPrice += item.num * item.price;
+				this.totalCount += item.num;
+			})
+			
+			this.$nextTick(function(){
+				bindInfo(); // 此处填第一次渲染完成后执行的代码
+			});
+		})
+		
+		window.updateCheck = this.checkInfo;
+	},
+	methods: {
+		lost: function(index) {
+			let val = this.nums[index];
+			if (val > 1) {
+				this.$set(this.nums, index, val - 1);
+				this.getTotal();
+			}
+		},
+		add: function(index) {
+			let val = this.nums[index];
+			this.$set(this.nums, index, val + 1);
+			this.getTotal();
+		},
+		delGoods: function(index, cno) {
+			if (confirm("您确定要删除吗？")) {
+				// 从数据库中删除
+				axios.post("../cart/del", qs.stringify({cno:cno})).then(result => {
+					let data = parseInt($.trim(result.data));
+					if (data > 0) {
+						this.$set(this.nums, index, 0);
+						this.getTotal();
+						$("#g_" + index).remove();
+					}
+				 }) 
+			}
+		},
+		getTotal: function() {
+			this.totalPrice = 0;
+			this.totalCount = 0;
+			this.nums.forEach((num, index) => {
+				if (this.status[index] == 1) {
+					this.totalPrice += num * this.prices[index];
+					this.totalCount += num;
+				}
+			})
+		},
+		checkInfo: function(index, st) {
+			this.$set(this.status, index, st);
+			this.getTotal();
+		}
+	}
+})
+
+function bindInfo() {
+	//全选和全不选
+	$("#all").click(function(){
+		//获取全选是否被选中
+		//prop 获取标签的固有属性  attr 自动义的属性
+		var flag = $(this).prop("checked");
+		//判断    
+		$(".cart_list_td ul .col01 input").prop("checked",flag);
+	});
+	
+	var checkboxs = $("#cart_list input[type='checkbox']");
+	var len = checkboxs.length;
+	for (var i = 0; i < len; i++) {
+		checkboxs[i].onclick = function() {
+			if (this.checked == true) {
+				updateCheck($(this).attr("index"), 1);
+			} else {
+				updateCheck($(this).attr("index"), 0);
+			}
+			
+			for (var j = 0; j < len; j++) {
+				if (!checkboxs[j].checked) {
+					$("#all").prop("checked", false);
+					return;
+				}
+			}
+			$("#all").prop("checked", true);
+		}
+	}
+}
+</script>
+</body>
+</html>
